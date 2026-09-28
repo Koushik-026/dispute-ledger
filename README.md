@@ -2,6 +2,10 @@
 
 > **Every resolved case makes the next response stronger.**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel%20Production-10b981?style=for-the-badge&logo=vercel)](https://dispute-ledger-inky.vercel.app)
+
+**Live Production URL:** [https://dispute-ledger-inky.vercel.app](https://dispute-ledger-inky.vercel.app)
+
 Dispute Ledger is a merchant chargeback-response workspace that uses **Hindsight Cloud** as its central long-term memory layer. It remembers every resolved dispute, recalls semantically similar cases for a new dispute, reflects across merchant history to surface patterns, shows the source cases behind its recommendations, and retains new outcomes so future case strategy continuously improves.
 
 ---
