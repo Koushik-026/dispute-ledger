@@ -103,9 +103,37 @@ export interface ReflectResponse {
 }
 
 export async function reflectOnMemories(query: string): Promise<ReflectResponse> {
-  const client = getHindsightClient();
-  const result = await client.reflect(BANK_ID, query);
-  return { text: result.text ?? '', raw: result };
+  try {
+    const client = getHindsightClient();
+    const result = await client.reflect(BANK_ID, query);
+    if (result?.text) {
+      return { text: result.text, raw: result };
+    }
+  } catch (err) {
+    console.warn('[reflectOnMemories] SDK reflect failed:', err);
+  }
+
+  // Direct REST fallback
+  if (API_KEY) {
+    try {
+      const res = await fetch(`${BASE_URL}/v1/default/banks/${BANK_ID}/reflect`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query, budget: 'low' }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { text: data.text ?? '', raw: data };
+      }
+    } catch (err) {
+      console.warn('[reflectOnMemories] REST reflect fallback failed:', err);
+    }
+  }
+
+  return { text: '', raw: null };
 }
 
 // ─── MENTAL MODELS ───────────────────────────────────────────────────────────────
