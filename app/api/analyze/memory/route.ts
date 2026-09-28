@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     let hindsightError: string | null = null;
 
     try {
-      recallResult = await recallMemories(recallQuery, 8);
+      recallResult = await recallMemories(recallQuery, 12);
     } catch (err: unknown) {
       hindsightError = err instanceof Error ? err.message : String(err);
       return NextResponse.json(

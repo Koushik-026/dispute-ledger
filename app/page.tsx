@@ -43,6 +43,7 @@ function statusBadge(status: string) {
 export default function Dashboard() {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [healthLoading, setHealthLoading] = useState(true);
+  const [playbookStatus, setPlaybookStatus] = useState<string>('Pending');
 
   useEffect(() => {
     fetch('/api/health')
@@ -50,6 +51,19 @@ export default function Dashboard() {
       .then((d) => setHealth(d))
       .catch(() => setHealth(null))
       .finally(() => setHealthLoading(false));
+
+    fetch('/api/playbook')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.content && (d.status === 'ready' || d.status === 'live' || d.status === 'completed')) {
+          setPlaybookStatus('Active');
+        } else if (d.status === 'queued' || d.status === 'in_progress') {
+          setPlaybookStatus('Generating');
+        } else if (d.status) {
+          setPlaybookStatus('Active');
+        }
+      })
+      .catch(() => setPlaybookStatus('Pending'));
   }, []);
 
   const hindsightConnected = health?.hindsight?.ok === true;
@@ -181,8 +195,8 @@ export default function Dashboard() {
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-secondary text-sm">Playbook status</span>
-                  <span className={`badge ${hindsightConnected ? 'badge-teal' : 'badge-neutral'}`}>
-                    {hindsightConnected ? 'Active' : 'Pending'}
+                  <span className={`badge ${playbookStatus === 'Active' ? 'badge-teal' : 'badge-neutral'}`}>
+                    {playbookStatus}
                   </span>
                 </div>
                 <div className="flex justify-between mb-4">

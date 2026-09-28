@@ -61,7 +61,7 @@ export default function DisputeWorkspace({ params }: { params: Promise<{ id: str
   const dispute = getDisputeById(id);
   const checklist = dispute ? getEvidenceChecklist(id, dispute.reason) : null;
 
-  const [activeTab, setActiveTab] = useState<'off' | 'on'>('on');
+  const [activeTab, setActiveTab] = useState<'off' | 'on'>('off');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [baselineResult, setBaselineResult] = useState<BaselineResponse | null>(null);
@@ -69,7 +69,6 @@ export default function DisputeWorkspace({ params }: { params: Promise<{ id: str
   const [outcomeState, setOutcomeState] = useState<'idle' | 'loading' | 'done'>('idle');
   const [outcomeResult, setOutcomeResult] = useState<OutcomeResponse | null>(null);
   const [outcomeSelected, setOutcomeSelected] = useState<'won' | 'lost' | null>(null);
-  const [sessionRetained, setSessionRetained] = useState(false);
   const [showReflection, setShowReflection] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -150,9 +149,10 @@ export default function DisputeWorkspace({ params }: { params: Promise<{ id: str
   };
 
   const recordOutcome = async (outcome: 'won' | 'lost') => {
-    if (sessionRetained) return;
+    if (outcomeState === 'loading') return;
     setOutcomeSelected(outcome);
     setOutcomeState('loading');
+    setError(null);
     try {
       const res = await fetch('/api/outcomes', {
         method: 'POST',
@@ -163,7 +163,6 @@ export default function DisputeWorkspace({ params }: { params: Promise<{ id: str
       if (!res.ok) throw new Error(data.error ?? 'Failed to record outcome');
       setOutcomeResult(data);
       setOutcomeState('done');
-      setSessionRetained(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Outcome record failed');
       setOutcomeState('idle');
@@ -547,34 +546,57 @@ export default function DisputeWorkspace({ params }: { params: Promise<{ id: str
                 <span className="badge badge-neutral">Demo outcome</span>
               </div>
               <div className="card-body">
-                {outcomeState === 'idle' && (
-                  <>
-                    <p className="text-xs text-muted mb-3">
-                      Recording an outcome retains a new resolved case experience to Hindsight.
-                      Future cases will benefit from this learning event.
-                    </p>
-                    {sessionRetained ? (
-                      <div className="badge badge-neutral">Outcome already retained this session</div>
+                <p className="text-xs text-muted mb-3">
+                  Recording an outcome retains a new resolved case experience to Hindsight.
+                  Future cases will benefit from this learning event.
+                </p>
+
+                <div className="flex gap-2">
+                  <button
+                    id="record-won-btn"
+                    disabled={outcomeState === 'loading'}
+                    className="btn btn-success"
+                    onClick={() => recordOutcome('won')}
+                  >
+                    {outcomeState === 'loading' && outcomeSelected === 'won' ? (
+                      <>
+                        <div className="loading-spinner" style={{ width: 12, height: 12 }} />
+                        Recording...
+                      </>
+                    ) : outcomeResult && outcomeResult.outcome === 'WON' ? (
+                      '✓ Won Recorded'
                     ) : (
-                      <div className="flex gap-2">
-                        <button className="btn btn-success" onClick={() => recordOutcome('won')}>
-                          ✓ Record Won
-                        </button>
-                        <button className="btn btn-danger" onClick={() => recordOutcome('lost')}>
-                          ✗ Record Lost
-                        </button>
-                      </div>
+                      '✓ Record Won'
                     )}
-                  </>
-                )}
+                  </button>
+                  <button
+                    id="record-lost-btn"
+                    disabled={outcomeState === 'loading'}
+                    className="btn btn-danger"
+                    onClick={() => recordOutcome('lost')}
+                  >
+                    {outcomeState === 'loading' && outcomeSelected === 'lost' ? (
+                      <>
+                        <div className="loading-spinner" style={{ width: 12, height: 12 }} />
+                        Recording...
+                      </>
+                    ) : outcomeResult && outcomeResult.outcome === 'LOST' ? (
+                      '✗ Lost Recorded'
+                    ) : (
+                      '✗ Record Lost'
+                    )}
+                  </button>
+                </div>
+
                 {outcomeState === 'loading' && (
-                  <div className="loading-step">
+                  <div className="loading-step mt-3">
                     <div className="loading-spinner" />
                     Retaining {outcomeSelected?.toUpperCase()} outcome to Hindsight...
                   </div>
                 )}
-                {outcomeState === 'done' && outcomeResult && (
-                  <div>
+
+                {outcomeResult && (
+                  <div style={{ marginTop: '0.875rem' }}>
                     <div className={`badge ${outcomeResult.outcome === 'WON' ? 'badge-success' : 'badge-error'} mb-2`}>
                       {outcomeResult.outcome} — {outcomeResult.verificationStatus === 'verified' ? '✓ Verified in Hindsight' : 'Stored — indexing in progress'}
                     </div>

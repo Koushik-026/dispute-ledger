@@ -62,11 +62,15 @@ export async function ensureBankExists(): Promise<void> {
 export interface RetainOptions {
   content: string;
   context?: string;
+  documentId?: string;
 }
 
 export async function retainMemory(opts: RetainOptions): Promise<void> {
   const client = getHindsightClient();
-  await client.retain(BANK_ID, opts.content);
+  await client.retain(BANK_ID, opts.content, {
+    context: opts.context,
+    documentId: opts.documentId,
+  });
 }
 
 // ─── RECALL ─────────────────────────────────────────────────────────────────────
