@@ -30,7 +30,7 @@ export async function checkHindsightHealth(): Promise<{ ok: boolean; error?: str
         Authorization: `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
       },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) {
       return { ok: false, error: `Hindsight API returned ${res.status}` };
