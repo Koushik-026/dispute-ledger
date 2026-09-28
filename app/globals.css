@@ -269,7 +269,7 @@ body {
 
 .badge-navy {
   background: var(--navy);
-  color: white;
+  color: #ffffff !important;
 }
 
 /* ── Status dot ─────────────────────────── */
@@ -438,9 +438,10 @@ body {
 
 .memory-case-id {
   font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--navy);
+  letter-spacing: 0.02em;
+  color: #ffffff !important;
 }
 
 .memory-text {

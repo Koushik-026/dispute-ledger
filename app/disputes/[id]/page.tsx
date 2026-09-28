@@ -515,14 +515,19 @@ export default function DisputeWorkspace({ params }: { params: Promise<{ id: str
                   </div>
                   {memoryResult.recalledMemories.map((m, i) => {
                     const caseIds = extractCaseIdsFromText(m.text);
-                    const isWon = m.text.toUpperCase().includes('WON');
-                    const isLost = m.text.toUpperCase().includes('LOST');
+                    const upper = m.text.toUpperCase();
+                    const isWon = upper.includes('WON') || upper.includes('IN FAVOR OF THE MERCHANT') || upper.includes('RECOVERING');
+                    const isLost = upper.includes('LOST') || upper.includes('INSUFFICIENT');
                     return (
                       <div key={i} className="memory-card">
                         <div className="memory-card-header">
-                          {caseIds.map((cid) => (
-                            <span key={cid} className="memory-case-id badge badge-navy">{cid}</span>
-                          ))}
+                          {caseIds.length > 0 ? (
+                            caseIds.map((cid) => (
+                              <span key={cid} className="memory-case-id badge badge-navy">{cid}</span>
+                            ))
+                          ) : (
+                            <span className="badge badge-teal">Precedent Rule</span>
+                          )}
                           {isWon && !isLost && <span className="badge badge-success">WON</span>}
                           {isLost && !isWon && <span className="badge badge-error">LOST</span>}
                           {m.score !== undefined && (
