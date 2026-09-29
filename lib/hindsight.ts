@@ -173,10 +173,35 @@ export async function listMentalModels(): Promise<MentalModel[]> {
   }));
 }
 
+export async function getMentalModel(id: string): Promise<MentalModel | null> {
+  if (!API_KEY) throw new Error('HINDSIGHT_API_KEY is not set');
+  const res = await fetch(`${BASE_URL}/v1/default/banks/${BANK_ID}/mental-models/${id}`, {
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return {
+    id: data.id,
+    name: data.name ?? '',
+    content: data.content || data.reflect_response?.text || '',
+    status: data.status ?? 'ready',
+  };
+}
+
 export async function getMerchantPlaybook(): Promise<MentalModel | null> {
   try {
     const models = await listMentalModels();
-    return models.find((m) => m.name === PLAYBOOK_MODEL_NAME) ?? null;
+    const found = models.find((m) => m.name === PLAYBOOK_MODEL_NAME);
+    if (!found) return null;
+    if (found.content) return found;
+    if (found.id) {
+      const detail = await getMentalModel(found.id);
+      if (detail && detail.content) return detail;
+    }
+    return found;
   } catch {
     return null;
   }
