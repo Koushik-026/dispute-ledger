@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -51,3 +49,7 @@ next-env.d.ts
 *.swp
 *.swo
 *~
+
+# local development helper files
+/AGENTS.md
+/CLAUDE.md
