@@ -303,7 +303,7 @@ It is **not** a production dispute processor, legal advice, an issuer integratio
 
 For this project I kept the scope smaller on purpose: one workflow, visible memory, a reproducible dataset, and a clear before/after comparison.
 
----
+----
 
 ## Live links
 
